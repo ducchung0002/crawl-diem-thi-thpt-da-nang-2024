@@ -1,0 +1,5 @@
+node_modules/
+.~lock.students.xlsx#
+.prettierrc
+package-lock.json
+package.json
