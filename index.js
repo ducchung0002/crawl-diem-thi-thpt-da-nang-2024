@@ -1,41 +1,18 @@
 const axios = require('axios');
-const XLSX = require('xlsx');
+const fs = require('fs');
 
 async function searching() {
     const config = {
         method: 'get',
         url: 'https://tracuudiem.danang.gov.vn:8443/tracuu/public/diemthi',
         headers: {
-            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:127.0) Gecko/20100101 Firefox/127.0',
-            'Accept': 'application/json, text/plain, */*',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate, br, zstd',
             'X-APP-CODE': 'e1d062d8bb2e38757c8e7c7c9ed3dc28',
-            'Origin': 'https://tracuudiem.danang.gov.vn',
-            'Connection': 'keep-alive',
-            'Referer': 'https://tracuudiem.danang.gov.vn/',
-            'Sec-Fetch-Dest': 'empty',
-            'Sec-Fetch-Mode': 'cors',
-            'Sec-Fetch-Site': 'same-site',
-            'Priority': 'u=1'
         },
         params: {
-            capt: 'PP39',
             cot1: '',
-            cot2: '',
-            cot3: '',
-            cot4: '',
-            cot5: '',
-            cot6: '',
-            cot7: '',
-            page: 0,
-            size: 3,
             kyThiId: 104
         }
     };
-    const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.json_to_sheet([], { header: ['SO_BAO_DANH', 'HO_VA_TEN', 'NGU_VAN', 'NGOAI_NGU', 'TOAN', 'DIEM_XET_TUYEN'] });
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Students");
 
     let content;
     let students = [];
@@ -73,11 +50,16 @@ async function searching() {
         }
     }
 
-    XLSX.utils.sheet_add_json(worksheet, students, { origin: -1, skipHeader: true });
-    XLSX.writeFile(workbook, "diem_thi_da_nang.xlsx");
-    console.log("Data has been written to students.xlsx");
+    const csvContent = students.map(student => Object.values(student).join(',')).join('\n');
+    const csvHeader = Object.keys(students[0]).join(',') + '\n';
+    fs.writeFile('diem_thi_da_nang.csv', csvHeader + csvContent, 'utf8', function (err) {
+        if (err) {
+            console.log('Some error occurred - file either not saved or corrupted file saved.');
+        } else{
+            console.log('Data has been written to diem_thi_da_nang.csv');
+        }
+    });
 }
-
 
 function main() {
     searching();
